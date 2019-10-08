@@ -1,6 +1,7 @@
 # build train list and valid list
 
 import csv
+import random
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
@@ -64,27 +65,41 @@ def test(iterator, next_element):
             plt.show()
 
 
+def shuffle(image_list, label_list):
+    # combine two lists before shuffle
+    lists = list(zip(image_list, label_list))
+    random.shuffle(lists)
+    image_list, label_list = zip(*lists)
+    # print(image_list[1], label_list[1])
+    
+    return image_list, label_list
+
+
 def init(batch_size):
-    class datasets:
+    class Datasets:
         pass
     # get train list
     image_train_list = []
     label_train_list = []
-    datasets.image_train_list, datasets.label_train_list = get_list(image_train_list, label_train_list, train_csv_path)
+    Datasets.image_train_list, Datasets.label_train_list = get_list(image_train_list, label_train_list, train_csv_path)
+    # Datasets.image_train_list, Datasets.label_train_list = shuffle(Datasets.image_train_list, Datasets.label_train_list)
     # print(image_train_list[:5], label_train_list[:5])
 
     # get test list
     image_test_list = []
     label_test_list = []
-    datasets.image_test_list, datasets.label_test_list = get_list(image_test_list, label_test_list, test_csv_path)
-
+    Datasets.image_test_list, Datasets.label_test_list = get_list(image_test_list, label_test_list, test_csv_path)
+    # Datasets.image_test_list, Datasets.label_test_list = shuffle(Datasets.image_test_list, Datasets.label_test_list)
+    
     # get train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices((image_train_list, label_train_list))
-    datasets.train_dataset = train_dataset.map(read_image).batch(batch_size)
+    train_dataset = train_dataset.shuffle(300)
+    Datasets.train_dataset = train_dataset.map(read_image).batch(batch_size)
     # print(train_dataset.output_shapes, train_dataset.output_types)
 
     # get test dataset
     test_dataset = tf.data.Dataset.from_tensor_slices((image_test_list, label_test_list))
-    datasets.test_dataset = test_dataset.map(read_image).batch(batch_size)
+    test_dataset = test_dataset.shuffle(300)
+    Datasets.test_dataset = test_dataset.map(read_image).batch(batch_size)
 
-    return datasets
+    return Datasets
