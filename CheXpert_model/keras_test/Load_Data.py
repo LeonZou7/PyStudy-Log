@@ -15,10 +15,11 @@ def load_image(filename, is_train=False):
     img = Image.open(filename)
     img_resized = img.resize((img_size, img_size), Image.ANTIALIAS)
     img_data = np.array(img_resized)
-    print(img_data.shape)
+    img_data = img_data[:,:,np.newaxis]
+    # print(f"img shape:{img_data.shape}")
     if is_train:
-        return img_data
-    return img_data / 255.0
+        return img_data.astype(np.float32)
+    return (img_data / 255.0).astype(np.float32)
 
 
 def shuffle_data(x_data, y_data):
@@ -64,8 +65,13 @@ def DATA_ITERATOR(x_data, y_data, batch_size=16, is_train=True):
 
     # split data into batches
     batch_num = int(len(x_data) / batch_size)
-    x_batches = np.array_split(x_data, batch_num)
-    y_batches = np.array_split(y_data, batch_num)
+    # standardize the batch size
+    split_sign = int(batch_num * batch_size)
+
+    x_batches = np.array_split(x_data[:split_sign], batch_num)
+    y_batches = np.array_split(y_data[:split_sign], batch_num)
+    # print(batch_num, batch_size, len(x_data), len(y_data), len(x_batches), len(y_batches))
+    # print(y_batches[0].shape, x_batches[0].shape)
 
     # get data batch
     for i in range(len(x_batches)):
@@ -80,8 +86,12 @@ def DATA_ITERATOR(x_data, y_data, batch_size=16, is_train=True):
         yield x_batch, keras.utils.to_categorical(y_batch, num_classes=3)
 
 
-dataset = get_all(root_path, train_csv_path, test_csv_path)
+def init():
+    return get_all(root_path, train_csv_path, test_csv_path)
+
+
+""" dataset = get_all(root_path, train_csv_path, test_csv_path)
 # print(dataset.train_images.shape)
 # print(dataset.train_labels.shape)
 for x, y in DATA_ITERATOR(dataset.train_images, dataset.train_labels, 16, True):
-    print(x[1], y[1])
+    print(x[1].dtype, y[1].dtype) """

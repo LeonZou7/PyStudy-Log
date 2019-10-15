@@ -2,9 +2,9 @@ import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
 import numpy as np
-from model_test.keras_test import Load_Data
-
 import os
+import Load_Data
+
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 img_size = 320
@@ -56,5 +56,8 @@ model.compile(optimizer='Adam',
 
 datasets = Load_Data.init()
 
-
-model.fit(datasets.train_dataset.)
+# step_per_epoch = len(images) / batch_size
+spe = int(len(datasets.train_images)/batch_size)
+model.fit_generator(Load_Data.DATA_ITERATOR(datasets.train_images, datasets.train_labels, batch_size=batch_size), 
+                    steps_per_epoch=spe, 
+                    epochs=1)
