@@ -3,23 +3,6 @@ import numpy as np
 import csv
 from PIL import Image
 
-from tensorflow.keras.applications.densenet import DenseNet121, preprocess_input
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from tensorflow.keras.models import Model
-
-""" 
-#base_model = DenseNet(weights='imagenet', include_top=False)
-base_model = DenseNet121(include_top=False)
-
-x = base_model.output
-x = GlobalAveragePooling2D()(x) 
-predictions = Dense(5, activation='softmax')(x)
-model = Model(inputs=base_model.input, outputs=predictions)
-
-model.summary()
-print('the number of layers in this model:'+str(len(model.layers)))
-"""
-
 root_path = '/extra1/Dataset/'
 train_csv_path = '/home/zhouli/model_test/radio.csv'
 test_csv_path = '/home/zhouli/model_test/valid_test.csv'
