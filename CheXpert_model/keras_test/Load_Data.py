@@ -3,10 +3,28 @@ import numpy as np
 import csv
 from PIL import Image
 
+from tensorflow.keras.applications.densenet import DenseNet121, preprocess_input
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
+
+""" 
+#base_model = DenseNet(weights='imagenet', include_top=False)
+base_model = DenseNet121(include_top=False)
+
+x = base_model.output
+x = GlobalAveragePooling2D()(x) 
+predictions = Dense(5, activation='softmax')(x)
+model = Model(inputs=base_model.input, outputs=predictions)
+
+model.summary()
+print('the number of layers in this model:'+str(len(model.layers)))
+"""
+
 root_path = '/extra1/Dataset/'
 train_csv_path = '/home/zhouli/model_test/radio.csv'
 test_csv_path = '/home/zhouli/model_test/valid_test.csv'
 img_size = 320
+count = 0
 
 
 def load_image(filename, is_train=False):
@@ -30,7 +48,7 @@ def shuffle_data(x_data, y_data):
     return x_data, y_data
 
 
-def get_all(root_path, train_csv_path, test_csv_path):
+def get_all(root_path, train_csv_path, test_csv_path, epochs):
     class Dataset:
         pass
     
@@ -52,15 +70,17 @@ def get_all(root_path, train_csv_path, test_csv_path):
                 Dataset.test_labels = labels
         is_train = False
 
-    Dataset.train_images = np.array(Dataset.train_images)
-    Dataset.train_labels = np.array(Dataset.train_labels)
-    Dataset.test_images = np.array(Dataset.test_images)
-    Dataset.test_labels = np.array(Dataset.test_labels)
+    Dataset.train_images = np.tile(np.array(Dataset.train_images), epochs)
+    Dataset.train_labels = np.tile(np.array(Dataset.train_labels), epochs)
+    Dataset.test_images = np.tile(np.array(Dataset.test_images), epochs)
+    Dataset.test_labels = np.tile(np.array(Dataset.test_labels), epochs)
     
     return Dataset
 
 
 def DATA_ITERATOR(x_data, y_data, batch_size=16, is_train=True):
+    global count
+
     shuffle_data(x_data, y_data)
 
     # split data into batches
@@ -82,16 +102,22 @@ def DATA_ITERATOR(x_data, y_data, batch_size=16, is_train=True):
 
         y_batch = np.array(y_batches[i])
         # print(x_batch.shape, y_batch.shape)
+        """ count += 1
+        if count % 100 == 0:
+            print('     count: ' + str(count)) """
 
         yield x_batch, keras.utils.to_categorical(y_batch, num_classes=3)
 
 
-def init():
-    return get_all(root_path, train_csv_path, test_csv_path)
+def init(epochs):
+    return get_all(root_path, train_csv_path, test_csv_path, epochs)
 
-
-""" dataset = get_all(root_path, train_csv_path, test_csv_path)
+""" 
+epochs = 1
+dataset = get_all(root_path, train_csv_path, test_csv_path, epochs)
+print(dataset.train_images[:5])
 # print(dataset.train_images.shape)
 # print(dataset.train_labels.shape)
 for x, y in DATA_ITERATOR(dataset.train_images, dataset.train_labels, 16, True):
-    print(x[1].dtype, y[1].dtype) """
+    print(x[1].dtype, y[1].dtype) 
+"""
