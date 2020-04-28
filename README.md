@@ -1,3 +1,3 @@
-# TF-Study-Log
+# PyStudy-Log
 
-My stydy log about Tensorflow on Colaboratory.
+Records of Numpy/Tensorflow/Pytorch study
